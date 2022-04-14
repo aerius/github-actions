@@ -1,0 +1,103 @@
+name: "Build and publish generic AERIUS Java project"
+description: "Build and publish AERIUS Java project, including running unittests / Sonar"
+inputs:
+   GITHUB_TOKEN:
+     required: true
+     description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
+   SONAR_TOKEN:
+     required: true
+     description: "The token needed to push analyses to SonarCloud."
+   NEXUS_USERNAME:
+     required: true
+     description: "The Nexus username needed to publish packages."
+   NEXUS_PASSWORD:
+     required: true
+     description: "The Nexus password needed to publish packages."
+   ROOT_POM_DIRECTORY:
+     required: false
+     description: "The directory where the root POM can be found."
+     default: "."
+   JAVA_VERSION:
+     required: false
+     description: "The Java version to use when building the project."
+     default: 11
+
+runs:
+  using: "composite"
+  steps:
+    #
+    # Checkout the code - for PR's we need to checkout the PR itself instead of the branch the PR is based on.
+    #
+    - if: github.event_name != 'pull_request_target'
+      name: checkout (general)
+      uses: actions/checkout@v2
+    - if: github.event_name == 'pull_request_target'
+      name: checkout (pull_request)
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+    # Setup JDK - default to version 11, override by providing JAVA_VERSION as input.
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ github.event.inputs.JAVA_VERSION }}
+
+    # (Restore) cache SonarCloud packages - not needed when doing a release
+    - if: github.event_name != 'release'
+      name: Cache SonarCloud packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    # (Restore) cache Maven package
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    #
+    # Build and analyse the project.
+    # For a PR we will supply some extra information about the PR needed by Sonar.
+    #
+    - if: github.event_name == 'push' || github.event_name == 'release'
+      name: Build and analyze (push / release)
+      env:
+        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
+      run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar,publish verify sonar:sonar
+    - if: github.event_name == 'pull_request_target'
+      name: Build and analyze (pull_request_target)
+      env:
+        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
+    - if: github.event_name == 'release'
+      run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify sonar:sonar -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+      name: Build packages for release
+      env:
+        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
+      run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P publish package
+
+    #
+    # Publish packages.
+    # Only if it's a SNAPSHOT version or when it's a release version if triggered by a release event.
+    #
+    - name: Publish - get Maven project version
+      id: get_maven_project_version
+      run: |
+        VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
+        echo "::set-output name=version::${VERSION}"
+    # Artifacts should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
+    - if: github.event_name == 'release' || endsWith(steps.get_maven_project_version.outputs.version, '-SNAPSHOT')
+      name: Publish - Maven Artifacts
+      uses: samuelmeuli/action-maven-publish@v1
+      with:
+        server_id: aerius-nexus
+        nexus_username: ${{ github.event.inputs.NEXUS_USERNAME }}
+        nexus_password: ${{ github.event.inputs.NEXUS_PASSWORD }}
+        maven_args: -DskipTests --no-transfer-progress -P publish -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml
