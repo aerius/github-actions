@@ -74,12 +74,14 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
+      shell: bash
       run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar,publish verify sonar:sonar
     - if: github.event_name == 'pull_request_target'
       name: Build and analyze (pull_request_target)
       env:
         GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
+      shell: bash
       run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify sonar:sonar -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
     #
@@ -88,6 +90,7 @@ runs:
     #
     - name: Publish - get Maven project version
       id: get_maven_project_version
+      shell: bash
       run: |
         VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
         echo "::set-output name=version::${VERSION}"
