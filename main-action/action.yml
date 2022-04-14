@@ -46,7 +46,7 @@ runs:
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: ${{ github.event.inputs.JAVA_VERSION }}
+        java-version: ${{ inputs.JAVA_VERSION }}
 
     # (Restore) cache SonarCloud packages - not needed when doing a release
     - if: github.event_name != 'release'
@@ -72,17 +72,17 @@ runs:
     - if: github.event_name == 'push' || github.event_name == 'release'
       name: Build and analyze (push / release)
       env:
-        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
       shell: bash
-      run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar,publish verify sonar:sonar
+      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar,publish verify sonar:sonar
     - if: github.event_name == 'pull_request_target'
       name: Build and analyze (pull_request_target)
       env:
-        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
       shell: bash
-      run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify sonar:sonar -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify sonar:sonar -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
     #
     # Publish packages.
@@ -92,14 +92,14 @@ runs:
       id: get_maven_project_version
       shell: bash
       run: |
-        VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
+        VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
         echo "::set-output name=version::${VERSION}"
     # Artifacts should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
     - if: github.event_name == 'release' || endsWith(steps.get_maven_project_version.outputs.version, '-SNAPSHOT')
       name: Publish - Maven Artifacts
       uses: samuelmeuli/action-maven-publish@v1
       with:
-        server_id: ${{ github.event.inputs.POM_PUBLISH_REPOSITORY_NAME }}
-        nexus_username: ${{ github.event.inputs.NEXUS_USERNAME }}
-        nexus_password: ${{ github.event.inputs.NEXUS_PASSWORD }}
-        maven_args: -DskipTests --no-transfer-progress -P publish -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml
+        server_id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
+        nexus_username: ${{ inputs.NEXUS_USERNAME }}
+        nexus_password: ${{ inputs.NEXUS_PASSWORD }}
+        maven_args: -DskipTests --no-transfer-progress -P publish -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml
