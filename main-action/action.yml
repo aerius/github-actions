@@ -5,8 +5,8 @@ inputs:
      required: true
      description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
    SONAR_TOKEN:
-     required: true
-     description: "The token needed to push analyses to SonarCloud."
+     required: false
+     description: "The token needed to push analyses to SonarCloud. If not set this will be skipped."
    NEXUS_USERNAME:
      required: true
      description: "The Nexus username needed to publish packages."
@@ -49,7 +49,7 @@ runs:
         java-version: ${{ inputs.JAVA_VERSION }}
 
     # (Restore) cache SonarCloud packages - not needed when doing a release
-    - if: github.event_name != 'release'
+    - if: github.event_name != 'release' && inputs.SONAR_TOKEN != ''
       name: Cache SonarCloud packages
       uses: actions/cache@v1
       with:
@@ -75,14 +75,18 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
       shell: bash
-      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar,publish verify sonar:sonar
+      run: |
+        SONAR_TOKEN=${{ inputs.SONAR_TOKEN }}
+        mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar,publish verify ${SONAR_TOKEN:+sonar:sonar}
     - if: github.event_name == 'pull_request_target'
       name: Build and analyze (pull_request_target)
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
       shell: bash
-      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify sonar:sonar -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+      run: |
+        SONAR_TOKEN=${{ inputs.SONAR_TOKEN }}
+        mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify ${SONAR_TOKEN:+sonar:sonar} -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
     #
     # Publish packages.
