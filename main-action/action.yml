@@ -80,12 +80,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ github.event.inputs.SONAR_TOKEN }}
-    - if: github.event_name == 'release'
       run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P sonar verify sonar:sonar -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
-      name: Build packages for release
-      env:
-        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
-      run: mvn --no-transfer-progress -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml -P publish package
 
     #
     # Publish packages.
