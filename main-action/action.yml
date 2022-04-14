@@ -13,6 +13,10 @@ inputs:
    NEXUS_PASSWORD:
      required: true
      description: "The Nexus password needed to publish packages."
+   POM_PUBLISH_REPOSITORY_NAME:
+     required: false
+     description: "The repository as specified in the root POM to publish to."
+     default: "aerius-nexus"
    ROOT_POM_DIRECTORY:
      required: false
      description: "The directory where the root POM can be found."
@@ -97,7 +101,7 @@ runs:
       name: Publish - Maven Artifacts
       uses: samuelmeuli/action-maven-publish@v1
       with:
-        server_id: aerius-nexus
+        server_id: ${{ github.event.inputs.POM_PUBLISH_REPOSITORY_NAME }}
         nexus_username: ${{ github.event.inputs.NEXUS_USERNAME }}
         nexus_password: ${{ github.event.inputs.NEXUS_PASSWORD }}
         maven_args: -DskipTests --no-transfer-progress -P publish -f ${{ github.event.inputs.ROOT_POM_DIRECTORY }}/pom.xml
