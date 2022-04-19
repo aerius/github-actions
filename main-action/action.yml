@@ -99,7 +99,7 @@ runs:
         VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
         echo "::set-output name=version::${VERSION}"
     # Artifacts should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
-    - if: github.event_name == 'release' || endsWith(steps.get_maven_project_version.outputs.version, '-SNAPSHOT')
+    - if: github.event_name == 'release' || (github.event_name == 'push' && endsWith(steps.get_maven_project_version.outputs.version, '-SNAPSHOT'))
       name: Publish - Maven Artifacts
       uses: samuelmeuli/action-maven-publish@v1
       with:
