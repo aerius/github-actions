@@ -1,0 +1,23 @@
+name: "common :: Get Maven project version"
+description: "common :: Get project version using Maven - requires checkout-java to be run before"
+
+inputs:
+   ROOT_POM_DIRECTORY:
+     required: true
+     description: "The directory where the root POM can be found."
+
+outputs:
+  VERSION:
+    description: "The project version as specified in the root POM."
+    value: ${{ steps.get-maven-project-version.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Maven project version
+      id: get-maven-project-version
+      shell: bash
+      run: |
+        VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
+        echo "::set-output name=version::${VERSION}"
+

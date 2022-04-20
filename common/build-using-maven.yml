@@ -1,0 +1,20 @@
+name: "common :: Build using Maven"
+description: "common :: Build using Maven - requires checkout-java to be run before"
+
+inputs:
+   GITHUB_TOKEN:
+     required: true
+     description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
+   ROOT_POM_DIRECTORY:
+     required: true
+     description: "The directory where the root POM can be found."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build using Maven
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+      shell: bash
+      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -P publish verify
+

@@ -1,0 +1,13 @@
+name: "common :: Cache Maven packages"
+description: "common :: Cache maven packages - requires checkout-java to be run before"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+

@@ -1,0 +1,19 @@
+name: "common :: Cache Sonar packages"
+description: "common :: Cache Sonar packages"
+
+inputs:
+   SONAR_TOKEN:
+     required: false
+     description: "The token needed to push analyses to Sonar. Will be used to determine whether we need to skip this step if not provided."
+
+runs:
+  using: "composite"
+  steps:
+    - if: inputs.SONAR_TOKEN != ''
+      name: Cache Sonar packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
