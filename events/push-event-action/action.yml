@@ -30,29 +30,29 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./../../aerius-github-actions/common/checkout-java.yml
+    - uses: ./aerius-github-actions/common/checkout-java.yml
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JDK_VERSION: ${{ inputs.JDK_VERSION }}
 
-    - uses: ./../../aerius-github-actions/common/cache-sonar-packages.yml
+    - uses: ./aerius-github-actions/common/cache-sonar-packages.yml
 
-    - uses: ./../../aerius-github-actions/common/cache-maven-packages.yml
+    - uses: ./aerius-github-actions/common/cache-maven-packages.yml
 
-    - uses: ./../../aerius-github-actions/common/build-and-analyse-using-maven-and-sonar.yml
+    - uses: ./aerius-github-actions/common/build-and-analyse-using-maven-and-sonar.yml
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
     - id: get-project-version
-      uses: ./../../aerius-github-actions/common/get-maven-project-version.yml
+      uses: ./aerius-github-actions/common/get-maven-project-version.yml
       with:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
     # Artifacts should only be published on pushes with a SNAPSHOT version
     - if: endsWith(steps.get_maven_project_version.outputs.version, '-SNAPSHOT')
-      uses: ./../../aerius-github-actions/common/publish-maven-artifacts.yml
+      uses: ./aerius-github-actions/common/publish-maven-artifacts.yml
       with:
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}

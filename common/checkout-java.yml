@@ -12,7 +12,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./checkout.yml
+    - uses: ./aerius-github-actions/common/checkout.yml
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 

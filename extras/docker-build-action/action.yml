@@ -24,13 +24,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./../../aerius-github-actions/common/checkout-java.yml
+    - uses: ./aerius-github-actions/common/checkout-java.yml
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JDK_VERSION: ${{ inputs.JDK_VERSION }}
 
     - id: get-project-version
-      uses: ./../../aerius-github-actions/common/get-maven-project-version.yml
+      uses: ./aerius-github-actions/common/get-maven-project-version.yml
       with:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
