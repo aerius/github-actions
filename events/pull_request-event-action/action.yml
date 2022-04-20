@@ -17,14 +17,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./aerius-github-actions/common/checkout-java.yml
+    - uses: ./aerius-github-actions/common/checkout-java
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JDK_VERSION: ${{ inputs.JDK_VERSION }}
 
-    - uses: ./aerius-github-actions/common/cache-maven-packages.yml
+    - uses: ./aerius-github-actions/common/cache-maven-packages
 
-    - uses: ./aerius-github-actions/common/build-using-maven.yml
+    - uses: ./aerius-github-actions/common/build-using-maven
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
