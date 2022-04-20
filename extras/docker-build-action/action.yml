@@ -34,9 +34,7 @@ runs:
       with:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
-    # Artifacts should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
-    - if: github.event_name == 'release' || (github.event_name == 'push' && endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT'))
-      name: Publish Docker image
+    - name: Publish Docker image
       uses: elgohr/Publish-Docker-Github-Action@v4
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
