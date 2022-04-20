@@ -30,29 +30,29 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ../../common/checkout-java.yml
+    - uses: ./../../common/checkout-java.yml
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JDK_VERSION: ${{ inputs.JDK_VERSION }}
 
-    - uses: ../../common/cache-sonar-packages.yml
+    - uses: ./../../common/cache-sonar-packages.yml
 
-    - uses: ../../common/cache-maven-packages.yml
+    - uses: ./../../common/cache-maven-packages.yml
 
-    - uses: ../../common/build-and-analyse-using-maven-and-sonar.yml
+    - uses: ./../../common/build-and-analyse-using-maven-and-sonar.yml
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
     - id: get-project-version
-      uses: ../../common/get-maven-project-version.yml
+      uses: ./../../common/get-maven-project-version.yml
       with:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
     # Artifacts should only be published on pushes with a SNAPSHOT version
     - if: endsWith(steps.get_maven_project_version.outputs.version, '-SNAPSHOT')
-      uses: ../../common/publish-maven-artifacts.yml
+      uses: ./../../common/publish-maven-artifacts.yml
       with:
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
