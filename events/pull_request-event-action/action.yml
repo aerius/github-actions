@@ -8,7 +8,7 @@ inputs:
    ROOT_POM_DIRECTORY:
      required: false
      description: "The directory where the root POM can be found."
-     default: "."
+     default: "repo"
    JDK_VERSION:
      required: false
      description: "The version of the JDK to setup."

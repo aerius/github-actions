@@ -11,4 +11,6 @@ runs:
   steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        path: repo
 
