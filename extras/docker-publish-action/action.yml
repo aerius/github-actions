@@ -24,7 +24,7 @@ inputs:
     default: "repo"
   DOCKERFILE_LOCATION:
     required: false
-    description: "The location of the Dockerfile inside the Docker work directory".
+    description: "The location of the Dockerfile inside the Docker work directory."
     default: "Dockerfile"
   ROOT_POM_DIRECTORY:
     required: false
