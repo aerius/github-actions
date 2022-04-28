@@ -12,10 +12,6 @@ inputs:
      required: false
      description: "The directory where the Dockerfile can be found."
      default: "repo"
-   ROOT_POM_DIRECTORY:
-     required: false
-     description: "The directory where the root POM can be found."
-     default: "repo"
    JDK_VERSION:
      required: false
      description: "The version of the JDK to setup."
@@ -28,11 +24,6 @@ runs:
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JDK_VERSION: ${{ inputs.JDK_VERSION }}
-
-    - id: get-project-version
-      uses: ./aerius-github-actions/common/get-maven-project-version
-      with:
-        ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
     - name: Publish Docker image
       uses: elgohr/Publish-Docker-Github-Action@v4
