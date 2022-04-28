@@ -2,18 +2,18 @@ name: "common :: Publish Maven Artifacts"
 description: "common :: Publish Maven Artifacts - requires checkout-java to be run before"
 
 inputs:
-   NEXUS_USERNAME:
-     required: true
-     description: "The Nexus username needed to publish packages."
-   NEXUS_PASSWORD:
-     required: true
-     description: "The Nexus password needed to publish packages."
-   POM_PUBLISH_REPOSITORY_NAME:
-     required: true
-     description: "The repository as specified in the root POM to publish to."
-   ROOT_POM_DIRECTORY:
-     required: true
-     description: "The directory where the root POM can be found."
+  NEXUS_USERNAME:
+    required: true
+    description: "The Nexus username needed to publish packages."
+  NEXUS_PASSWORD:
+    required: true
+    description: "The Nexus password needed to publish packages."
+  POM_PUBLISH_REPOSITORY_NAME:
+    required: true
+    description: "The repository as specified in the root POM to publish to."
+  ROOT_POM_DIRECTORY:
+    required: true
+    description: "The directory where the root POM can be found."
 
 runs:
   using: "composite"

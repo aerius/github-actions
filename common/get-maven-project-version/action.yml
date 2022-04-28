@@ -2,9 +2,9 @@ name: "common :: Get Maven project version"
 description: "common :: Get project version using Maven - requires checkout-java to be run before"
 
 inputs:
-   ROOT_POM_DIRECTORY:
-     required: true
-     description: "The directory where the root POM can be found."
+  ROOT_POM_DIRECTORY:
+    required: true
+    description: "The directory where the root POM can be found."
 
 outputs:
   VERSION:

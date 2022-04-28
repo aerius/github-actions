@@ -2,34 +2,38 @@ name: "Build or publish Docker images for a generic AERIUS Java project"
 description: "Build or publish Docker images AERIUS Java project based on maven project version - this is an addition to the main-action - publish if release or SNAPSHOT version otherwise just build"
 
 inputs:
-   GITHUB_TOKEN:
-     required: true
-     description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
-   DOCKER_REGISTRY_USERNAME:
-     required: true
-     description: "The Docker Registry username needed to publish packages."
-   DOCKER_REGISTRY_PASSWORD:
-     required: true
-     description: "The Docker Registry password needed to publish packages."
-   DOCKER_IMAGE_NAME:
-     required: true
-     description: "The Docker image name to use when publishing."
-   DOCKER_REGISTRY:
-     required: false
-     description: "The Docker registry to push to."
-     default: "nexus-docker.aerius.nl"
-   DOCKERFILE_DIRECTORY:
-     required: false
-     description: "The directory where the Dockerfile can be found."
-     default: "repo"
-   ROOT_POM_DIRECTORY:
-     required: false
-     description: "The directory where the root POM can be found."
-     default: "repo"
-   JDK_VERSION:
-     required: false
-     description: "The version of the JDK to setup. Because this is used only to determine Maven project version it doesn't have to match the JDK needed to build to projects themselves."
-     default: 11
+  GITHUB_TOKEN:
+    required: true
+    description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
+  DOCKER_REGISTRY_USERNAME:
+    required: true
+    description: "The Docker Registry username needed to publish packages."
+  DOCKER_REGISTRY_PASSWORD:
+    required: true
+    description: "The Docker Registry password needed to publish packages."
+  DOCKER_IMAGE_NAME:
+    required: true
+    description: "The Docker image name to use when publishing."
+  DOCKER_REGISTRY:
+    required: false
+    description: "The Docker registry to push to."
+    default: "nexus-docker.aerius.nl"
+  DOCKER_WORK_DIRECTORY:
+    required: false
+    description: "The Docker work directory."
+    default: "repo"
+  DOCKERFILE_LOCATION:
+    required: false
+    description: "The location of the Dockerfile inside the Docker work directory".
+    default: "Dockerfile"
+  ROOT_POM_DIRECTORY:
+    required: false
+    description: "The directory where the root POM can be found."
+    default: "repo"
+  JDK_VERSION:
+    required: false
+    description: "The version of the JDK to setup. Because this is used only to determine Maven project version it doesn't have to match the JDK needed to build to projects themselves."
+    default: 11
 
 runs:
   using: "composite"
@@ -53,7 +57,8 @@ runs:
         username: ${{ inputs.DOCKER_REGISTRY_USERNAME }}
         password: ${{ inputs.DOCKER_REGISTRY_PASSWORD }}
         registry: ${{ inputs.DOCKER_REGISTRY }}
-        workdir: ${{ inputs.DOCKERFILE_DIRECTORY }}/
+        workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
+        dockerfile: ${{ inputs.DOCKERFILE_LOCATION }}
         tag_semver: true
 
     # Images should only be build if it's not a release, otherwise only on pushes with a non SNAPSHOT version
@@ -62,6 +67,7 @@ runs:
       uses: elgohr/Publish-Docker-Github-Action@v4
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
-        workdir: ${{ inputs.DOCKERFILE_DIRECTORY }}/
+        workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
+        dockerfile: ${{ inputs.DOCKERFILE_LOCATION }}
         no_push: true
 

@@ -2,9 +2,9 @@ name: "common :: Checkout"
 description: "common :: Checkout repository"
 
 inputs:
-   GITHUB_TOKEN:
-     required: true
-     description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
+  GITHUB_TOKEN:
+    required: true
+    description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
 
 runs:
   using: "composite"
