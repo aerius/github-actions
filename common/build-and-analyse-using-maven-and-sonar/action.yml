@@ -8,9 +8,9 @@ inputs:
   ROOT_POM_DIRECTORY:
     required: true
     description: "The directory where the root POM can be found."
-  FAIL_ON_TEST_FAILURES:
+  IGNORE_TEST_FAILURES:
     required: true
-    description: "Whether to fail step on test failures."
+    description: "Whether to ignore test failures."
   SONAR_TOKEN:
     required: false
     description: "The token needed to push analyses to Sonar. Will skip this step if not provided."
@@ -25,5 +25,5 @@ runs:
       shell: bash
       run: |
         SONAR_TOKEN=${{ inputs.SONAR_TOKEN }}
-        mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -Dmaven.test.failure.ignore=${{ inputs.FAIL_ON_TEST_FAILURES }} -P ${SONAR_TOKEN:+sonar,}publish verify ${SONAR_TOKEN:+sonar:sonar}
+        mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -Dmaven.test.failure.ignore=${{ inputs.IGNORE_TEST_FAILURES }} -P ${SONAR_TOKEN:+sonar,}publish verify ${SONAR_TOKEN:+sonar:sonar}
 

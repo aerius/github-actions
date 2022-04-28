@@ -8,9 +8,9 @@ inputs:
   ROOT_POM_DIRECTORY:
     required: true
     description: "The directory where the root POM can be found."
-  FAIL_ON_TEST_FAILURES:
+  IGNORE_TEST_FAILURES:
     required: true
-    description: "Whether to fail step on test failures."
+    description: "Whether to ignore test failures."
 
 runs:
   using: "composite"
@@ -19,5 +19,5 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       shell: bash
-      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -Dmaven.test.failure.ignore=${{ inputs.FAIL_ON_TEST_FAILURES }} -P publish verify
+      run: mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -Dmaven.test.failure.ignore=${{ inputs.IGNORE_TEST_FAILURES }} -P publish verify
 
