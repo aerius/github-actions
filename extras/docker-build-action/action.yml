@@ -12,20 +12,15 @@ inputs:
      required: false
      description: "The directory where the Dockerfile can be found."
      default: "repo"
-   JDK_VERSION:
-     required: false
-     description: "The version of the JDK to setup."
-     default: 11
 
 runs:
   using: "composite"
   steps:
-    - uses: ./aerius-github-actions/common/checkout-java
+    - uses: ./aerius-github-actions/common/checkout
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-        JDK_VERSION: ${{ inputs.JDK_VERSION }}
 
-    - name: Publish Docker image
+    - name: Build Docker image
       uses: elgohr/Publish-Docker-Github-Action@v4
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
