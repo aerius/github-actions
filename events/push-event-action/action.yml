@@ -44,6 +44,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        FAIL_ON_TEST_FAILURES: false
 
     - id: get-project-version
       uses: ./aerius-github-actions/common/get-maven-project-version
