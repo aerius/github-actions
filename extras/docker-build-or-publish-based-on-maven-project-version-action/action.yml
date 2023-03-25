@@ -51,7 +51,7 @@ runs:
     # Images should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
     - if: github.event_name == 'release' || endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT')
       name: Publish Docker image
-      uses: elgohr/Publish-Docker-Github-Action@v4
+      uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
         username: ${{ inputs.DOCKER_REGISTRY_USERNAME }}
@@ -64,7 +64,7 @@ runs:
     # Images should only be build if it's not a release, otherwise only on pushes with a non SNAPSHOT version
     - if: github.event_name != 'release' && !endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT')
       name: Build Docker image
-      uses: elgohr/Publish-Docker-Github-Action@v4
+      uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
         workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/

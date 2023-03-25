@@ -25,7 +25,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 
     - name: Build Docker image
-      uses: elgohr/Publish-Docker-Github-Action@v4
+      uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
         workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
