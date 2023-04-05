@@ -19,6 +19,5 @@ runs:
       shell: bash
       run: |
         VERSION=$(mvn -Dexpression=project.version -q -DforceStdout -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml help:evaluate 2>/dev/null)
-        echo "::set-output name=version::${VERSION}"
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "The maven project version is: ${VERSION}"
-
