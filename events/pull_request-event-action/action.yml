@@ -12,7 +12,11 @@ inputs:
   JDK_VERSION:
     required: false
     description: "The version of the JDK to setup."
-    default: 11
+    default: 17
+  IGNORE_TEST_FAILURES:
+    required: false
+    description: "Allow tests to fail."
+    default: false
 
 runs:
   using: "composite"
@@ -28,5 +32,4 @@ runs:
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
-        IGNORE_TEST_FAILURES: true
-
+        IGNORE_TEST_FAILURES: ${{ inputs.IGNORE_TEST_FAILURES }}
