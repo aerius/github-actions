@@ -33,7 +33,7 @@ inputs:
   JDK_VERSION:
     required: false
     description: "The version of the JDK to setup."
-    default: 11
+    default: 17
 
 runs:
   using: "composite"

@@ -33,7 +33,7 @@ inputs:
   JDK_VERSION:
     required: false
     description: "The version of the JDK to setup. Because this is used only to determine Maven project version it doesn't have to match the JDK needed to build to projects themselves."
-    default: 11
+    default: 17
 
 runs:
   using: "composite"
