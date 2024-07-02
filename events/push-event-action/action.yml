@@ -56,7 +56,8 @@ runs:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
     # Artifacts should only be published on pushes with a SNAPSHOT version
-    - if: endsWith(steps.get-project-version.outputs.version, '-SNAPSHOT')
+    # We will also ignore dependendabot branches - as they don't originate from a fork
+    - if: ${{ !startswith(github.ref_name, 'dependabot/') && endsWith(steps.get-project-version.outputs.version, '-SNAPSHOT') }}
       uses: ./aerius-github-actions/common/publish-maven-artifacts
       with:
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
