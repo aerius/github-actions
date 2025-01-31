@@ -12,7 +12,7 @@ inputs:
   JDK_VERSION:
     required: false
     description: "The version of the JDK to setup."
-    default: 17
+    default: 21
   IGNORE_TEST_FAILURES:
     required: false
     description: "Allow tests to fail."
