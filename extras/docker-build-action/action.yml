@@ -16,6 +16,10 @@ inputs:
     required: false
     description: "The location of the Dockerfile inside the Docker work directory."
     default: "Dockerfile"
+  DOCKER_BUILD_PLATFORMS:
+    required: false
+    description: "The platforms to build for, e.g.: linux/amd64,linux/arm64"
+    default: ""
 
 runs:
   using: "composite"
@@ -24,11 +28,20 @@ runs:
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 
+    - if: inputs.DOCKER_BUILD_PLATFORMS != ''
+      name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - if: inputs.DOCKER_BUILD_PLATFORMS != ''
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Build Docker image
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: ${{ inputs.DOCKER_IMAGE_NAME }}
         workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
         dockerfile: ${{ inputs.DOCKERFILE_LOCATION }}
+        platforms: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
         no_push: true
 
