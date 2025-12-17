@@ -26,6 +26,10 @@ inputs:
     required: false
     description: "The location of the Dockerfile inside the Docker work directory."
     default: "Dockerfile"
+  DOCKER_BUILD_PLATFORMS:
+    required: false
+    description: "The platforms to build for, e.g.: linux/amd64,linux/arm64"
+    default: ""
   ROOT_POM_DIRECTORY:
     required: false
     description: "The directory where the root POM can be found."
@@ -48,6 +52,14 @@ runs:
       with:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
+    - if: inputs.DOCKER_BUILD_PLATFORMS != ''
+      name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - if: inputs.DOCKER_BUILD_PLATFORMS != ''
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     # Artifacts should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
     - if: github.event_name == 'release' || (github.event_name == 'push' && endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT'))
       name: Publish Docker image
@@ -59,5 +71,6 @@ runs:
         registry: ${{ inputs.DOCKER_REGISTRY }}
         workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
         dockerfile: ${{ inputs.DOCKERFILE_LOCATION }}
+        platforms: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
         tag_semver: true
 
