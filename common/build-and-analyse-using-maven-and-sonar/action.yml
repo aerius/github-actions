@@ -11,9 +11,13 @@ inputs:
   IGNORE_TEST_FAILURES:
     required: true
     description: "Whether to ignore test failures."
+  MAVEN_PROFILE:
+    required: true
+    description: "The maven profile(s) to use."
   SONAR_TOKEN:
     required: false
     description: "The token needed to push analyses to Sonar. Will skip this step if not provided."
+
 
 runs:
   using: "composite"
@@ -25,5 +29,5 @@ runs:
       shell: bash
       run: |
         SONAR_TOKEN=${{ inputs.SONAR_TOKEN }}
-        mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -Dmaven.test.failure.ignore=${{ inputs.IGNORE_TEST_FAILURES }} -P ${SONAR_TOKEN:+sonar,}publish verify ${SONAR_TOKEN:+org.sonarsource.scanner.maven:sonar-maven-plugin::sonar}
+        mvn --no-transfer-progress -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml -Dmaven.test.failure.ignore=${{ inputs.IGNORE_TEST_FAILURES }} -P ${SONAR_TOKEN:+sonar,}${{ inputs.MAVEN_PROFILE }} verify ${SONAR_TOKEN:+org.sonarsource.scanner.maven:sonar-maven-plugin::sonar}
 

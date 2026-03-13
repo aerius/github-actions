@@ -2,30 +2,34 @@ name: "release event action"
 description: "On release event build and publish AERIUS Java project, including running the unittests / a Sonar analysis"
 
 inputs:
-   GITHUB_TOKEN:
-     required: true
-     description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
-   SONAR_TOKEN:
-     required: false
-     description: "The token needed to push analyses to Sonar. If not set this will be skipped."
-   NEXUS_USERNAME:
-     required: true
-     description: "The Nexus username needed to publish packages."
-   NEXUS_PASSWORD:
-     required: true
-     description: "The Nexus password needed to publish packages."
-   POM_PUBLISH_REPOSITORY_NAME:
-     required: false
-     description: "The repository as specified in the root POM to publish to."
-     default: "aerius-nexus"
-   ROOT_POM_DIRECTORY:
-     required: false
-     description: "The directory where the root POM can be found."
-     default: "repo"
-   JDK_VERSION:
-     required: false
-     description: "The version of the JDK to setup."
-     default: 21
+  GITHUB_TOKEN:
+    required: true
+    description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
+  SONAR_TOKEN:
+    required: false
+    description: "The token needed to push analyses to Sonar. If not set this will be skipped."
+  NEXUS_USERNAME:
+    required: true
+    description: "The Nexus username needed to publish packages."
+  NEXUS_PASSWORD:
+    required: true
+    description: "The Nexus password needed to publish packages."
+  POM_PUBLISH_REPOSITORY_NAME:
+    required: false
+    description: "The repository as specified in the root POM to publish to."
+    default: "aerius-nexus"
+  ROOT_POM_DIRECTORY:
+    required: false
+    description: "The directory where the root POM can be found."
+    default: "repo"
+  JDK_VERSION:
+    required: false
+    description: "The version of the JDK to setup."
+    default: 21
+  MAVEN_PROFILE:
+    required: false
+    description: "The maven profile(s) to use. By default only 'all' will be used. For the publish part, the 'publish' profile will be used."
+    default: "all"
 
 runs:
   using: "composite"
@@ -44,6 +48,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_PROFILE: ${{ inputs.MAVEN_PROFILE }}
         IGNORE_TEST_FAILURES: false
 
     - uses: ./aerius-github-actions/common/publish-maven-artifacts
