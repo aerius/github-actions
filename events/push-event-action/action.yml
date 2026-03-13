@@ -30,9 +30,9 @@ inputs:
     required: false
     description: "Allow tests to fail."
     default: false
-  MAVEN_PROFILE:
+  MAVEN_BUILD_PROFILE:
     required: false
-    description: "The maven profile(s) to use. By default only 'all' will be used."
+    description: "The maven profile(s) to use when building. By default only 'all' will be used."
     default: "all"
 
 runs:
@@ -53,7 +53,7 @@ runs:
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
         IGNORE_TEST_FAILURES: ${{ inputs.IGNORE_TEST_FAILURES }}
-        MAVEN_PROFILE: ${{ inputs.MAVEN_PROFILE }}
+        MAVEN_BUILD_PROFILE: ${{ inputs.MAVEN_BUILD_PROFILE }}
 
     - id: get-project-version
       uses: ./aerius-github-actions/common/get-maven-project-version

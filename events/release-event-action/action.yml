@@ -26,10 +26,14 @@ inputs:
     required: false
     description: "The version of the JDK to setup."
     default: 21
-  MAVEN_PROFILE:
+  MAVEN_BUILD_PROFILE:
     required: false
-    description: "The maven profile(s) to use. By default only 'all' will be used. For the publish part, the 'publish' profile will be used."
+    description: "The maven profile(s) to use when building. By default only 'all' will be used."
     default: "all"
+  MAVEN_PUBLISH_PROFILE:
+    required: false
+    description: "The maven profile(s) to use when publishing to Nexus. By default only 'publish' will be used."
+    default: "publish"
 
 runs:
   using: "composite"
@@ -48,7 +52,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
-        MAVEN_PROFILE: ${{ inputs.MAVEN_PROFILE }}
+        MAVEN_BUILD_PROFILE: ${{ inputs.MAVEN_BUILD_PROFILE }}
         IGNORE_TEST_FAILURES: false
 
     - uses: ./aerius-github-actions/common/publish-maven-artifacts
@@ -57,4 +61,5 @@ runs:
         NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
         POM_PUBLISH_REPOSITORY_NAME: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_PUBLISH_PROFILE: ${{ inputs.MAVEN_PUBLISH_PROFILE }}
 
