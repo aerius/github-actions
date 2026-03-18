@@ -18,7 +18,6 @@ inputs:
     required: false
     description: "The token needed to push analyses to Sonar. Will skip this step if not provided."
 
-
 runs:
   using: "composite"
   steps:
