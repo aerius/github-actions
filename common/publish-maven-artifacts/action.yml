@@ -14,6 +14,9 @@ inputs:
   ROOT_POM_DIRECTORY:
     required: true
     description: "The directory where the root POM can be found."
+  MAVEN_PUBLISH_PROFILE:
+    required: true
+    description: "The maven profile(s) to use."
 
 runs:
   using: "composite"
@@ -24,5 +27,5 @@ runs:
         server_id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
         nexus_username: ${{ inputs.NEXUS_USERNAME }}
         nexus_password: ${{ inputs.NEXUS_PASSWORD }}
-        maven_args: -DskipTests -P publish -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml
+        maven_args: -DskipTests -P ${{ inputs.MAVEN_PUBLISH_PROFILE }} -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml
 

@@ -17,6 +17,10 @@ inputs:
     required: false
     description: "Allow tests to fail."
     default: false
+  MAVEN_BUILD_PROFILE:
+    required: false
+    description: "The maven profile(s) to use when building. By default only 'all' will be used."
+    default: "all"
 
 runs:
   using: "composite"
@@ -33,3 +37,4 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
         IGNORE_TEST_FAILURES: ${{ inputs.IGNORE_TEST_FAILURES }}
+        MAVEN_BUILD_PROFILE: ${{ inputs.MAVEN_BUILD_PROFILE }}
