@@ -34,6 +34,10 @@ inputs:
     required: false
     description: "The maven profile(s) to use when building. By default only 'all' will be used."
     default: "all"
+  MAVEN_PUBLISH_PROFILE:
+    required: false
+    description: "The maven profile(s) to use when publishing. By default only 'publish' will be used."
+    default: "publish"
 
 runs:
   using: "composite"
@@ -69,4 +73,5 @@ runs:
         NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
         POM_PUBLISH_REPOSITORY_NAME: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_PUBLISH_PROFILE: ${{ inputs.MAVEN_PUBLISH_PROFILE }}
 
