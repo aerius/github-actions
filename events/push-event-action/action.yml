@@ -46,6 +46,7 @@ runs:
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JDK_VERSION: ${{ inputs.JDK_VERSION }}
+        POM_PUBLISH_REPOSITORY_NAME: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
 
     - uses: ./aerius-github-actions/common/cache-sonar-packages
 
@@ -67,9 +68,8 @@ runs:
     - if: ${{ !startswith(github.ref_name, 'dependabot/') && endsWith(steps.get-project-version.outputs.version, '-SNAPSHOT') }}
       uses: ./aerius-github-actions/common/publish-maven-artifacts
       with:
-        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
-        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
-        POM_PUBLISH_REPOSITORY_NAME: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
         MAVEN_PUBLISH_PROFILE: ${{ inputs.MAVEN_PUBLISH_PROFILE }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
 

@@ -8,6 +8,10 @@ inputs:
   JDK_VERSION:
     required: true
     description: "The version of the JDK to setup."
+  POM_PUBLISH_REPOSITORY_NAME:
+    required: false
+    description: "The repository as specified in the root POM to publish to. Only needed for publishing."
+    default: non-existent-server-id
 
 runs:
   using: "composite"
@@ -22,3 +26,6 @@ runs:
         java-version: ${{ inputs.JDK_VERSION }}
         distribution: temurin
         cache: maven
+        server-id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
+        server-username: NEXUS_USERNAME
+        server-password: NEXUS_PASSWORD
