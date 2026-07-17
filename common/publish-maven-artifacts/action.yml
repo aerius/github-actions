@@ -22,10 +22,15 @@ runs:
   using: "composite"
   steps:
     - name: Publish Maven Artifacts
-      uses: samuelmeuli/action-maven-publish@v1
-      with:
-        server_id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
-        nexus_username: ${{ inputs.NEXUS_USERNAME }}
-        nexus_password: ${{ inputs.NEXUS_PASSWORD }}
-        maven_args: -DskipTests -P ${{ inputs.MAVEN_PUBLISH_PROFILE }} -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml
-
+      shell: bash
+      env:
+        INPUT_SERVER_ID: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
+        INPUT_NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        INPUT_NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+      run: |
+        mvn deploy \
+          --settings aerius-github-actions/resources/maven_publish_settings.xml \
+          --batch-mode \
+          -P deploy,${{ inputs.MAVEN_PUBLISH_PROFILE }} \
+          -DskipTests \
+          -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml
