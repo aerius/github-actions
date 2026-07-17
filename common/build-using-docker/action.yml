@@ -1,0 +1,73 @@
+name: "common :: Build using Docker"
+description: "common :: Build using Docker - requires init-docker to be run before. Can optionally publish the images after."
+
+inputs:
+  DOCKER_IMAGE_NAME:
+    required: true
+    description: "The Docker image name to use when publishing."
+  DOCKER_WORK_DIRECTORY:
+    required: true
+    description: "The Docker work directory."
+  DOCKERFILE_LOCATION:
+    required: true
+    description: "The location of the Dockerfile inside the Docker work directory."
+  DOCKER_BUILD_PLATFORMS:
+    required: true
+    description: "The platforms to build for, e.g.: linux/amd64,linux/arm64"
+
+  DOCKER_REGISTRY:
+    required: false
+    description: "The Docker registry to push to."
+    default: "local-build"
+  DOCKER_REGISTRY_USERNAME:
+    required: false
+    description: "The Docker Registry username needed to publish packages."
+    default: ""
+  DOCKER_REGISTRY_PASSWORD:
+    required: false
+    description: "The Docker Registry password needed to publish packages."
+    default: ""
+  DOCKER_PUBLISH:
+    required: false
+    description: "Whether to publish the images after build"
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    - if: inputs.DOCKER_PUBLISH == 'true'
+      name: Login to Docker Registry
+      uses: docker/login-action@v4
+      with:
+        registry: ${{ inputs.DOCKER_REGISTRY }}
+        username: ${{ inputs.DOCKER_REGISTRY_USERNAME }}
+        password: ${{ inputs.DOCKER_REGISTRY_PASSWORD }}
+
+    - name: Determine tags to use
+      id: determine-image-tags
+      shell: bash
+      env:
+        DOCKER_REGISTRY: ${{ inputs.DOCKER_REGISTRY }}
+        DOCKER_IMAGE_NAME: ${{ inputs.DOCKER_IMAGE_NAME }}
+      run: |
+        TAGS="${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:latest" # default
+
+        if [[ "${GITHUB_REF}" == 'refs/tags/'* ]]; then
+          TAGS=''
+          for TAG in $(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+)\.([0-9]+)\.([0-9]+)/\1.\2.\3 \1.\2 \1/g"); do
+            [[ -n "${TAGS}" ]] && TAGS+=','
+            TAGS+="${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${TAG}"
+          done
+        fi
+
+        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        echo "Determined tags: ${TAGS}"
+
+    - name: Build and optionally push to Docker Registry
+      uses: docker/build-push-action@v7
+      with:
+        context: ${{ inputs.DOCKER_WORK_DIRECTORY }}
+        file: ${{ inputs.DOCKER_WORK_DIRECTORY }}/${{ inputs.DOCKERFILE_LOCATION }}
+        tags: ${{ steps.determine-image-tags.outputs.tags }}
+        platforms: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
+        push: ${{ inputs.DOCKER_PUBLISH }}
