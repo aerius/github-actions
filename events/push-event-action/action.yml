@@ -49,8 +49,6 @@ runs:
 
     - uses: ./aerius-github-actions/common/cache-sonar-packages
 
-    - uses: ./aerius-github-actions/common/cache-maven-packages
-
     - uses: ./aerius-github-actions/common/build-and-analyse-using-maven-and-sonar
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
