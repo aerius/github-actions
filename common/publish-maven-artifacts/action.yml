@@ -2,30 +2,30 @@ name: "common :: Publish Maven Artifacts"
 description: "common :: Publish Maven Artifacts - requires checkout-java to be run before"
 
 inputs:
-  NEXUS_USERNAME:
-    required: true
-    description: "The Nexus username needed to publish packages."
-  NEXUS_PASSWORD:
-    required: true
-    description: "The Nexus password needed to publish packages."
-  POM_PUBLISH_REPOSITORY_NAME:
-    required: true
-    description: "The repository as specified in the root POM to publish to."
   ROOT_POM_DIRECTORY:
     required: true
     description: "The directory where the root POM can be found."
   MAVEN_PUBLISH_PROFILE:
     required: true
     description: "The maven profile(s) to use."
+  NEXUS_USERNAME:
+    required: false
+    description: "The Nexus username needed to publish artifacts."
+  NEXUS_PASSWORD:
+    required: false
+    description: "The Nexus password needed to publish artifacts."
 
 runs:
   using: "composite"
   steps:
     - name: Publish Maven Artifacts
-      uses: samuelmeuli/action-maven-publish@v1
-      with:
-        server_id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
-        nexus_username: ${{ inputs.NEXUS_USERNAME }}
-        nexus_password: ${{ inputs.NEXUS_PASSWORD }}
-        maven_args: -DskipTests -P ${{ inputs.MAVEN_PUBLISH_PROFILE }} -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml
-
+      shell: bash
+      env:
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+      run: |
+        mvn deploy \
+          --batch-mode \
+          -P deploy,${{ inputs.MAVEN_PUBLISH_PROFILE }} \
+          -DskipTests \
+          -f ${{ inputs.ROOT_POM_DIRECTORY }}/pom.xml

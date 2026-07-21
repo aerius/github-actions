@@ -5,6 +5,14 @@ inputs:
   GITHUB_TOKEN:
     required: true
     description: "Just pass the secrets.GITHUB_TOKEN to this action as input."
+  ROOT_POM_DIRECTORY:
+    required: false
+    description: "The directory where the root POM can be found."
+    default: "repo"
+  JDK_VERSION:
+    required: false
+    description: "The version of the JDK to setup."
+    default: 21
   DOCKER_REGISTRY_USERNAME:
     required: true
     description: "The Docker Registry username needed to publish packages."
@@ -30,14 +38,6 @@ inputs:
     required: false
     description: "The platforms to build for, e.g.: linux/amd64,linux/arm64"
     default: ""
-  ROOT_POM_DIRECTORY:
-    required: false
-    description: "The directory where the root POM can be found."
-    default: "repo"
-  JDK_VERSION:
-    required: false
-    description: "The version of the JDK to setup."
-    default: 21
 
 runs:
   using: "composite"
@@ -52,21 +52,21 @@ runs:
       with:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
 
-    - if: inputs.DOCKER_BUILD_PLATFORMS != ''
-      name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    - uses: ./aerius-github-actions/common/init-docker
+      with:
+        DOCKER_BUILD_PLATFORMS: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
 
     # Artifacts should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
     - if: github.event_name == 'release' || (github.event_name == 'push' && endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT'))
-      name: Publish Docker image
-      uses: elgohr/Publish-Docker-Github-Action@v5
+      uses: ./aerius-github-actions/common/build-using-docker
       with:
-        name: ${{ inputs.DOCKER_IMAGE_NAME }}
-        username: ${{ inputs.DOCKER_REGISTRY_USERNAME }}
-        password: ${{ inputs.DOCKER_REGISTRY_PASSWORD }}
-        registry: ${{ inputs.DOCKER_REGISTRY }}
-        workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
-        dockerfile: ${{ inputs.DOCKERFILE_LOCATION }}
-        platforms: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
-        tag_semver: true
+        DOCKER_IMAGE_NAME: ${{ inputs.DOCKER_IMAGE_NAME }}
+        DOCKER_WORK_DIRECTORY: ${{ inputs.DOCKER_WORK_DIRECTORY }}
+        DOCKERFILE_LOCATION: ${{ inputs.DOCKERFILE_LOCATION }}
+        DOCKER_BUILD_PLATFORMS: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
+
+        DOCKER_REGISTRY: ${{ inputs.DOCKER_REGISTRY }}
+        DOCKER_REGISTRY_USERNAME: ${{ inputs.DOCKER_REGISTRY_USERNAME }}
+        DOCKER_REGISTRY_PASSWORD: ${{ inputs.DOCKER_REGISTRY_PASSWORD }}
+        DOCKER_PUBLISH: true
 

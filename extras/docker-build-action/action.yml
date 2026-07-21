@@ -28,16 +28,14 @@ runs:
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 
-    - if: inputs.DOCKER_BUILD_PLATFORMS != ''
-      name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Build Docker image
-      uses: elgohr/Publish-Docker-Github-Action@v5
+    - uses: ./aerius-github-actions/common/init-docker
       with:
-        name: ${{ inputs.DOCKER_IMAGE_NAME }}
-        workdir: ${{ inputs.DOCKER_WORK_DIRECTORY }}/
-        dockerfile: ${{ inputs.DOCKERFILE_LOCATION }}
-        platforms: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
-        no_push: true
+        DOCKER_BUILD_PLATFORMS: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
+
+    - uses: ./aerius-github-actions/common/build-using-docker
+      with:
+        DOCKER_IMAGE_NAME: ${{ inputs.DOCKER_IMAGE_NAME }}
+        DOCKER_WORK_DIRECTORY: ${{ inputs.DOCKER_WORK_DIRECTORY }}
+        DOCKERFILE_LOCATION: ${{ inputs.DOCKERFILE_LOCATION }}
+        DOCKER_BUILD_PLATFORMS: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
 

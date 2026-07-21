@@ -1,5 +1,5 @@
 name: "common :: Checkout Java"
-description: "common :: Checkout repository and setup JDK/Maven"
+description: "common :: Checkout repository and setup Java (JDK / Maven)"
 
 inputs:
   GITHUB_TOKEN:
@@ -8,6 +8,10 @@ inputs:
   JDK_VERSION:
     required: true
     description: "The version of the JDK to setup."
+  POM_PUBLISH_REPOSITORY_NAME:
+    required: false
+    description: "The repository as specified in the root POM to publish to. Only needed for publishing."
+    default: non-existent-server-id
 
 runs:
   using: "composite"
@@ -16,9 +20,12 @@ runs:
       with:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 
-    # Setup JDK / mvn, override by providing JDK_VERSION as input.
-    - name: Set up JDK / mvn
-      uses: actions/setup-java@v1
+    - name: Setup Java (JDK / Maven)
+      uses: actions/setup-java@v5
       with:
         java-version: ${{ inputs.JDK_VERSION }}
-
+        distribution: temurin
+        cache: maven
+        server-id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}
+        server-username: NEXUS_USERNAME
+        server-password: NEXUS_PASSWORD

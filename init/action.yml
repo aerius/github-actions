@@ -1,0 +1,13 @@
+name: "init action"
+description: "Will make sure this repo is present under ./aerius-github-actions/ in a generic way so we don't have to repeat the repo/version combination"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Symlink current github-actions under ./aerius-github-actions
+      shell: bash
+      run: |
+        # github.action_path will be inside this init directory, so we have to go a directory higher
+        AERIUS_GITHUB_ACTIONS_PATH=$(realpath "${{ github.action_path }}/..")
+
+        ln -s "${AERIUS_GITHUB_ACTIONS_PATH}" aerius-github-actions
