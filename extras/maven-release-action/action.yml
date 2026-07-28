@@ -15,6 +15,10 @@ inputs:
     required: false
     description: "The directory where the root POM can be found."
     default: "repo"
+  MAVEN_RELEASE_PROFILE:
+    required: false
+    description: "The maven profile(s) to use when setting the versions. By default only 'all' will be used."
+    default: "all"
   JDK_VERSION:
     required: false
     description: "The version of the JDK to setup."
@@ -43,17 +47,17 @@ runs:
         echo "Whoops! Project version should be a snapshot version but is: ${PROJECT_VERSION}"
         exit 1
 
-    # TODO; Make profile configurable? - below as well
     - name: Set release version
       shell: bash
       env:
         RELEASE_VERSION: ${{ inputs.RELEASE_VERSION }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_RELEASE_PROFILE: ${{ inputs.MAVEN_RELEASE_PROFILE }}
       run: |
         mvn \
           -DnewVersion="${RELEASE_VERSION}" \
           -DgenerateBackupPoms=false \
-          -Psonar \
+          -P "${MAVEN_RELEASE_PROFILE}" \
           -f "${ROOT_POM_DIRECTORY}"/pom.xml \
           versions:set
 
@@ -63,10 +67,11 @@ runs:
       shell: bash
       env:
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_RELEASE_PROFILE: ${{ inputs.MAVEN_RELEASE_PROFILE }}
       run: |
         mvn \
           -Denforcer.rules=requireReleaseDeps \
-          -Psonar \
+          -P "${MAVEN_RELEASE_PROFILE}" \
           -f "${ROOT_POM_DIRECTORY}"/pom.xml \
           org.apache.maven.plugins:maven-enforcer-plugin:enforce
 
@@ -109,11 +114,12 @@ runs:
       env:
         NEXT_DEV_VERSION: ${{ inputs.NEXT_DEV_VERSION }}
         ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_RELEASE_PROFILE: ${{ inputs.MAVEN_RELEASE_PROFILE }}
       run: |
         mvn \
           -DnewVersion="${NEXT_DEV_VERSION}" \
           -DgenerateBackupPoms=false \
-          -Psonar \
+          -P "${MAVEN_RELEASE_PROFILE}" \
           -f "${ROOT_POM_DIRECTORY}"/pom.xml \
           versions:set
 
