@@ -2,24 +2,32 @@ name: "common :: Checkout Java"
 description: "common :: Checkout repository and setup Java (JDK / Maven)"
 
 inputs:
+  DEPLOY_KEY:
+    required: false
+    description: "The repo deploy key to provide if any actual changes will be needed."
   JDK_VERSION:
     required: false
     description: "The version of the JDK to setup."
-    default: 21
   POM_PUBLISH_REPOSITORY_NAME:
     required: false
     description: "The repository as specified in the root POM to publish to. Only needed for publishing."
-    default: non-existent-server-id
+    default: 'non-existent-server-id'
+  FETCH_DEPTH:
+    required: false
+    description: "The fetch depth to optionally override. By default it will only fetch a single commit."
 
 runs:
   using: "composite"
   steps:
     - uses: ./aerius-github-actions/common/checkout
+      with:
+        DEPLOY_KEY: ${{ inputs.DEPLOY_KEY }}
+        FETCH_DEPTH: ${{ inputs.FETCH_DEPTH }}
 
     - name: Setup Java (JDK / Maven)
       uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
       with:
-        java-version: ${{ inputs.JDK_VERSION }}
+        java-version: ${{ inputs.JDK_VERSION || 21 }}
         distribution: temurin
         cache: maven
         server-id: ${{ inputs.POM_PUBLISH_REPOSITORY_NAME }}

@@ -1,6 +1,14 @@
 name: "common :: Checkout"
 description: "common :: Checkout repository"
 
+inputs:
+  DEPLOY_KEY:
+    required: false
+    description: "The repo deploy key to provide if any actual changes will be needed."
+  FETCH_DEPTH:
+    required: false
+    description: "The fetch depth to optionally override. By default it will only fetch a single commit."
+
 runs:
   using: "composite"
   steps:
@@ -8,4 +16,5 @@ runs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         path: repo
-
+        ssh-key: ${{ inputs.DEPLOY_KEY }}
+        fetch-depth: ${{ inputs.FETCH_DEPTH }}
