@@ -1,0 +1,137 @@
+name: "Maven release for a generic AERIUS Java project"
+description: "Maven release for a generic AERIUS Java project"
+
+inputs:
+  DEPLOY_KEY:
+    required: true
+    description: "The repo deploy key needed to do the actual changes."
+  RELEASE_VERSION:
+    description: 'Release version (e.g. 1.0.0)'
+    required: true
+  NEXT_DEV_VERSION:
+    description: 'Next development version (e.g. 1.0.1-SNAPSHOT)'
+    required: true
+  ROOT_POM_DIRECTORY:
+    required: false
+    description: "The directory where the root POM can be found."
+    default: "repo"
+  MAVEN_RELEASE_PROFILE:
+    required: false
+    description: "The maven profile(s) to use when setting the versions. By default only 'all' will be used."
+    default: "all"
+  JDK_VERSION:
+    required: false
+    description: "The version of the JDK to setup."
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./aerius-github-actions/common/checkout-java
+      with:
+        DEPLOY_KEY: ${{ inputs.DEPLOY_KEY }}
+        JDK_VERSION: ${{ inputs.JDK_VERSION }}
+        FETCH_DEPTH: 0 # fetch everything instead of a single commit
+
+    - id: get-project-version
+      uses: ./aerius-github-actions/common/get-maven-project-version
+      with:
+        ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+
+    # Do a quick version check, we should only do this while on a SNAPSHOT version
+    - if: ${{ !endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT') }}
+      name: Validate project uses a snapshot version
+      shell: bash
+      env:
+        PROJECT_VERSION: ${{ steps.get-project-version.outputs.VERSION }}
+      run: |
+        echo "Whoops! Project version should be a snapshot version but is: ${PROJECT_VERSION}"
+        exit 1
+
+    - name: Set release version
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ inputs.RELEASE_VERSION }}
+        ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_RELEASE_PROFILE: ${{ inputs.MAVEN_RELEASE_PROFILE }}
+      run: |
+        mvn \
+          -DnewVersion="${RELEASE_VERSION}" \
+          -DgenerateBackupPoms=false \
+          -P "${MAVEN_RELEASE_PROFILE}" \
+          -f "${ROOT_POM_DIRECTORY}"/pom.xml \
+          versions:set
+
+    # At this point, all internal SNAPSHOT refs should be resolved and updated to the release version.
+    # Any remaining SNAPSHOT are genuine external dependencies that should not be a snapshot.
+    - name: Check for SNAPSHOT dependencies
+      shell: bash
+      env:
+        ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_RELEASE_PROFILE: ${{ inputs.MAVEN_RELEASE_PROFILE }}
+      run: |
+        mvn \
+          -Denforcer.rules=requireReleaseDeps \
+          -P "${MAVEN_RELEASE_PROFILE}" \
+          -f "${ROOT_POM_DIRECTORY}"/pom.xml \
+          org.apache.maven.plugins:maven-enforcer-plugin:enforce
+
+    - name: Configure git author
+      shell: bash
+      run: |
+        cd repo
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+
+    - name: Commit the release version and tag
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ inputs.RELEASE_VERSION }}
+      run: |
+        cd repo
+        git add -A
+        git commit -m "Release: set version to ${RELEASE_VERSION}
+
+        Co-authored-by: Stikstofje <1662526+stikstofje@users.noreply.github.com>
+        "
+        git tag "${RELEASE_VERSION}"
+
+        git push origin HEAD
+        git push origin "${RELEASE_VERSION}"
+
+    - name: Create release in github
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_VERSION: ${{ inputs.RELEASE_VERSION }}
+      run: |
+        cd repo
+        gh release create "${RELEASE_VERSION}" \
+          -t "${RELEASE_VERSION}" \
+          --generate-notes
+
+    - name: Set next development version
+      shell: bash
+      env:
+        NEXT_DEV_VERSION: ${{ inputs.NEXT_DEV_VERSION }}
+        ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+        MAVEN_RELEASE_PROFILE: ${{ inputs.MAVEN_RELEASE_PROFILE }}
+      run: |
+        mvn \
+          -DnewVersion="${NEXT_DEV_VERSION}" \
+          -DgenerateBackupPoms=false \
+          -P "${MAVEN_RELEASE_PROFILE}" \
+          -f "${ROOT_POM_DIRECTORY}"/pom.xml \
+          versions:set
+
+    - name: Commit next development version
+      shell: bash
+      env:
+        NEXT_DEV_VERSION: ${{ inputs.NEXT_DEV_VERSION }}
+        ROOT_POM_DIRECTORY: ${{ inputs.ROOT_POM_DIRECTORY }}
+      run: |
+        cd repo
+        git add -A
+        git commit -m "Release: set next development version to ${NEXT_DEV_VERSION}
+
+        Co-authored-by: Stikstofje <1662526+stikstofje@users.noreply.github.com>"
+        git push origin HEAD
