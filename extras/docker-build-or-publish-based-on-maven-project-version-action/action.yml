@@ -51,8 +51,9 @@ runs:
       with:
         DOCKER_BUILD_PLATFORMS: ${{ inputs.DOCKER_BUILD_PLATFORMS }}
 
-    # Images should only be published if a release is made, otherwise only on pushes with a SNAPSHOT version
-    - if: github.event_name == 'release' || endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT')
+    # Images should only be published if a tag is pushed, otherwise only on pushes with a SNAPSHOT version
+    - if: >-
+        startsWith(github.ref, 'refs/tags/') || endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT')
       uses: ./aerius-github-actions/common/build-using-docker
       with:
         DOCKER_IMAGE_NAME: ${{ inputs.DOCKER_IMAGE_NAME }}
@@ -65,8 +66,9 @@ runs:
         DOCKER_REGISTRY_PASSWORD: ${{ inputs.DOCKER_REGISTRY_PASSWORD }}
         DOCKER_PUBLISH: true
 
-    # Images should only be build if it's not a release, otherwise only on pushes with a non SNAPSHOT version
-    - if: github.event_name != 'release' && !endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT')
+    # Images should only be build if not a tag is pushed, otherwise only on pushes with a non SNAPSHOT version
+    - if: >-
+        !startsWith(github.ref, 'refs/tags/') && !endsWith(steps.get-project-version.outputs.VERSION, '-SNAPSHOT')
       uses: ./aerius-github-actions/common/build-using-docker
       with:
         DOCKER_IMAGE_NAME: ${{ inputs.DOCKER_IMAGE_NAME }}
