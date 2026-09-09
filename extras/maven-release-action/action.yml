@@ -95,8 +95,8 @@ runs:
         "
         git tag "${RELEASE_VERSION}"
 
-        git push origin HEAD
-        git push origin "${RELEASE_VERSION}"
+        # Push commit and tag in one request. Doing them seperately can trigger race conditions.
+        git push --atomic origin HEAD "${RELEASE_VERSION}"
 
     - name: Create release in github
       shell: bash
